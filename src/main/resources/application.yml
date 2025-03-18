@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+spring:
+  application.name: ImageSeg
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/imagese?serverTimezone=GMT%2B8
+    username: root
+    password: root
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    lettuce:
+      pool:
+        max-active: 8 # 连接池最大连接数
+        max-wait: -1ms # 连接池最大阻塞等待时间
+        max-idle: 8 # 连接池中的最大空闲连接
+        min-idle: 0 # 连接池中的最小空闲连接
+
+# 日志
+mybatis-plus:
+  configuration.log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 全局变量声明
+globalVar:
+  verifycode_timeout: 180
+  jwt_token_redis_timeout: 1800 # Redis中的Jwt Token失效时间
