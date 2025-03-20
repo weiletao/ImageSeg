@@ -52,7 +52,7 @@ public class JwtFilter implements Filter {
         response.setContentType("application/json"); // 设置响应类型为JSON
 
         //获取 header里的token
-        final String token = request.getHeader("authorization");
+        final String token = request.getHeader("Authorization");
         log.info("成功获取header中的token{}", token);
 
         if ("OPTIONS".equals(request.getMethod())) {
@@ -64,17 +64,21 @@ public class JwtFilter implements Filter {
             Map<String,Object> re = new HashMap<>();
 
             if (token == null) {
-                re.put("code", 0);
-                re.put("message", "没有token！");
-                response.getWriter().write(objectMapper.writeValueAsString(re));
+//                re.put("code", 0);
+//                re.put("message", "没有token！");
+//                response.getWriter().write(objectMapper.writeValueAsString(re));
+                log.error("没有token！");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
                 return;
             }
 
             Map<String, Claim> userData = JwtUtil.validateToken(token);
             if (userData == null) {
-                re.put("code", 1);
-                re.put("message", "token不合法");
-                response.getWriter().write(objectMapper.writeValueAsString(re));
+//                re.put("code", 1);
+//                re.put("message", "token不合法");
+//                response.getWriter().write(objectMapper.writeValueAsString(re));
+                log.error("token不合法");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
                 return;
             }
             Integer id = userData.get("id").asInt();
@@ -85,9 +89,11 @@ public class JwtFilter implements Filter {
 
             /** 验证Redis中的Token 为了满足退出登录 修改密码的需求 */
             if(!iJwtRedisService.validateRedisJwtToken(id.toString(), token)){
-                re.put("code", 2);
-                re.put("message", "token校验失败");
-                response.getWriter().write(objectMapper.writeValueAsString(re));
+//                re.put("code", 2);
+//                re.put("message", "token校验失败");
+//                response.getWriter().write(objectMapper.writeValueAsString(re));
+                log.error("token校验失败");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
                 return;
             }
 

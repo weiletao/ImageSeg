@@ -4,12 +4,11 @@ package com.scu.imageseg.controller;
 import com.scu.imageseg.entity.CustomUser;
 import com.scu.imageseg.entity.JSONResult;
 import com.scu.imageseg.entity.LoginForm;
+import com.scu.imageseg.entity.PasswordData;
 import com.scu.imageseg.exception.ServiceException;
 import com.scu.imageseg.service.ICustomUserService;
 import com.scu.imageseg.service.IJwtRedisService;
 import com.scu.imageseg.service.IVerifyCodeService;
-import com.scu.imageseg.utils.JwtUtil;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,7 +21,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -134,6 +132,7 @@ public class CustomUserController {
 
     }
 
+
     /**
      * 测试JwtFilter接口 看看能否正确地过滤错误的Jwt和没有存在Redis中的Jwt
      */
@@ -141,5 +140,75 @@ public class CustomUserController {
     public String testJwt(){
         return "sccusses";
     }
+
+    /**
+     * 退出登录接口 实现用户退出登录功能 删除其在Redis存储的Jwt
+     */
+    @GetMapping("/jwtFilter/exit")
+    public JSONResult<Object> exit(HttpServletRequest httpServletRequest){
+        /** 从经过JwtFilter拦截的request中获取 id*/
+        String id = String.valueOf((Integer) httpServletRequest.getAttribute("id"));
+        if(iJwtRedisService.deleteRedisJwtToken(id)){
+            return new JSONResult<>(200, "退出成功！");
+        }else {
+            throw new ServiceException(208, "退出失败！");
+        }
+    }
+
+    /**
+     * 获取当前用户信息接口 实现个人信息的获取
+     */
+    @GetMapping("/jwtFilter/profile")
+    public JSONResult<CustomUser> getUserProfile(HttpServletRequest request){
+        try{
+            return new JSONResult<>(iCustomUserService.getUserProfile((String)request.getAttribute("username"))); // todo 此处是使用用户名做检索 最好使用用户id做检索 方便重用
+        }catch (Exception e){
+            throw new ServiceException(209, "获取用户信息失败！");
+        }
+    }
+
+    /**
+     * 修改用户信息接口 实现用户信息的修改
+     */
+    @PutMapping("/jwtFilter/profile/update")
+    public JSONResult<Object> updateUserProfile(HttpServletRequest request, CustomUser userData){
+        try{
+            return new JSONResult<>(iCustomUserService.updateUserProfile((Integer) request.getAttribute("id"), userData));
+        }catch (Exception e){
+            throw new ServiceException(210, "修改用户信息失败！");
+        }
+    }
+
+    /**
+     * 修改密码接口 实现用户密码的修改 直接调用用户接口服务的两个方法实现 不需要进一步封装
+     * 可能抛出3个异常
+     * 205，用户不存在ps
+     * 204，用户名或密码错误
+     * 211，修改密码失败
+     */
+    @PutMapping("jwtFilter/profile/pswUpdate")
+    public JSONResult<Object> updatePassword(HttpServletRequest request, PasswordData passwordData){
+        /** 验证用户名和密码是否正确 */
+        CustomUser customUser = new CustomUser();
+        customUser.setUsername((String) request.getAttribute("username")); // 设置用户名
+        customUser.setPassword(passwordData.getCurrentPassword()); // 设置未加密的密码
+        customUser = iCustomUserService.verifyUsernamePassword(customUser); // 验证后返回原数据库实体类
+        if (customUser == null){
+            log.error("用户不存在！");
+            throw new ServiceException(205, "用户不存在！"); // 用户名或密码错误的异常抛出封装在iCustomUserService中，说明原密码不对
+        }
+        /** 原密码正确后修改用户密码 */
+        customUser.setPassword(new BCryptPasswordEncoder().encode(passwordData.getNewPassword())); // 修改原实体类密码为加密后的新密码
+        log.info("开始修改密码...");
+        try{
+            iCustomUserService.updateUserProfile((Integer) request.getAttribute("id"), customUser);
+        }catch (Exception e){
+            log.info("修改密码失败！");
+            throw new ServiceException(211, "修改密码失败！");
+        }
+        log.info("修改密码成功！");
+        return new JSONResult<>(200, "修改密码成功！");
+    }
+
 
 }
