@@ -2,6 +2,10 @@ server:
   port: 8080
 
 spring:
+  servlet:
+    multipart:
+      enabled: true # 设置支持的单个上传文件的大小限制
+      max-file-size: 10MB # 设置最大的请求文件大小，设置总体大小请求
   application.name: ImageSeg
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver

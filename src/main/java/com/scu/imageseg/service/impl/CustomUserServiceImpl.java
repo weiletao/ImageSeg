@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务实现类
@@ -84,4 +86,24 @@ public class CustomUserServiceImpl extends ServiceImpl<CustomUserMapper, CustomU
         customUserMapper.update(userData, userUpdateWrapper); // 参数分别为：为了方便快速赋值而存在的实体类 + updateWrapper既可以指定要修改的具体值set，又可以指定条件where
         return userData; // 实体类经过update函数后会发生变化
     }
+
+    /**
+     * 获取某个角色的用户列表
+     * @param role
+     * @return
+     */
+    @Override
+    public List<CustomUser> getUsersListByRole(String role) {
+        // 判断角色名是否合法
+        if(!(role.equals("patient") || role.equals("doctor") || role.equals("admin"))){
+            log.info("角色名不合法！");
+            throw new ServiceException(212, "角色名不合法！");
+        }
+        // 进行数据库操作
+        log.info("执行角色列表查找...." + role);
+        QueryWrapper<CustomUser> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.eq("role", role);
+        return customUserMapper.selectList(userQueryWrapper);
+    }
+
 }

@@ -21,7 +21,9 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -62,7 +64,7 @@ public class CustomUserController {
         /** 尝试写入数据库 */
         log.info("-----开始写入数据库....-------");
         try{
-            iCustomUserService.save(customUser);
+            if(!iCustomUserService.save(customUser)) throw new Exception();
         }catch (Exception e){
             // todo 可补充对不同情况（如：用户已存在）的判断
             log.error("写入数据库失败！异常信息：" + e.getMessage());
@@ -208,6 +210,35 @@ public class CustomUserController {
         }
         log.info("修改密码成功！");
         return new JSONResult<>(200, "修改密码成功！");
+    }
+
+    /**
+     * 查询医生列表接口 实现新建诊断申请界面可选医生列表功能
+     * 可能抛出2个异常
+     * 212，用户名不合法
+     * 213，查询医生列表失败
+     */
+    @GetMapping("jwtFilter/doctors")
+    public JSONResult<Object> getDoctorsList(){
+        /** 获取医生用户列表 */
+        List<CustomUser> doctorsList;
+        try {
+            doctorsList = iCustomUserService.getUsersListByRole("doctor");
+            log.info("获取医生列表成功！");
+        }catch (Exception e){
+            log.info("查询医生列表失败：" + e.getMessage());
+            throw new ServiceException(213, "查询医生列表失败！");
+        }
+        /** 构造返回List<map> */
+        List<Map<String,Object>> re = new ArrayList<>();
+        for(CustomUser doctor: doctorsList){
+            Map<String, Object> map = new HashMap<>();
+            map.put("fullName", doctor.getFullName());
+            map.put("email", doctor.getEmail());
+            map.put("bio", doctor.getBio());
+            re.add(map);
+        }
+        return new JSONResult<>(re);
     }
 
 
