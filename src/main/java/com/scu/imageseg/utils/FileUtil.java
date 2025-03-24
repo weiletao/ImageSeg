@@ -54,7 +54,7 @@ public class FileUtil {
             log.error("文件保存失败！");
             throw new ServiceException(214, "文件保存失败！");
         }
-        return path + "\\\\" + fileName; // 返回重命名后的文件名
+        return fileName; // 返回重命名后的文件名
     }
 
 }

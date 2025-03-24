@@ -13,6 +13,7 @@ import com.scu.imageseg.service.IUserMessageService;
 import com.scu.imageseg.utils.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -114,6 +115,24 @@ public class DiagnosisRequestController {
 
         return new JSONResult<>(200, "操作成功！");
 
+    }
+
+    /**
+     * 我的诊断申请接口 实现患者新建用户诊断申请功能 同时在本地存储相关的images
+     * 可能抛出1个异常
+     * 215，写入诊断申请表异常！
+     * 216，诊断图像保存失败！
+     * 217，生成用户消息失败！
+     */
+    @GetMapping("/jwtFilter/myDiagnosisRequest")
+    public JSONResult<Object> myDiagnosisRequest(HttpServletRequest httpServletRequest){
+        log.info("开始获取用户诊断申请...");
+        try{
+            return new JSONResult<>(iDiagnosisRequestService.getUserDiagnosisRequestsWithImages(Long.valueOf((Integer)httpServletRequest.getAttribute("id"))));
+        }catch (Exception e){
+            log.error("获取用户诊断申请失败！");
+            throw new ServiceException(218, "获取用户诊断申请失败！");
+        }
     }
 
 }
