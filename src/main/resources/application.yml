@@ -21,6 +21,12 @@ spring:
         max-wait: -1ms # 连接池最大阻塞等待时间
         max-idle: 8 # 连接池中的最大空闲连接
         min-idle: 0 # 连接池中的最小空闲连接
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
+    virtualHost: /
 
 # 日志
 mybatis-plus:

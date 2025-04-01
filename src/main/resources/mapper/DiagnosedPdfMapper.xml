@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scu.imageseg.mapper.DiagnosedPdfMapper">
+    <resultMap id="BaseResultMap" type="com.scu.imageseg.entity.DiagnosedPdf">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="pdfPath" column="pdf_path" jdbcType="VARCHAR"/>
+        <result property="updatedAt" column="updated_at" jdbcType="DATE"/>
+        <result property="diagnosisRequestId" column="diagnosis_request_id" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,pdf_path,updated_at,
+        diagnosis_request_id
+    </sql>
+</mapper>

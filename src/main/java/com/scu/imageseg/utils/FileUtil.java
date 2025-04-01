@@ -2,11 +2,13 @@ package com.scu.imageseg.utils;
 
 import com.scu.imageseg.exception.ServiceException;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -22,6 +24,7 @@ import java.util.UUID;
  */
 @Slf4j
 @AllArgsConstructor
+@NoArgsConstructor
 public class FileUtil {
 
     private MultipartFile multipartFile;
@@ -36,12 +39,12 @@ public class FileUtil {
                 .getParentFile().getAbsolutePath() + "\\src\\main\\resources\\static\\img";
     }
 
-    public String saveFile() {
+    public String saveFile(Long dId) {
         // 给文件重命名
         String fileName = UUID.randomUUID() + "." + multipartFile.getContentType()
                 .substring(multipartFile.getContentType().lastIndexOf("/") + 1);
         // 获取保存路径
-        String path = getResourceSavePath();
+        String path = getResourceSavePath() + "\\" + dId;
         try {
             File files = new File(path, fileName);
             File parentFile = files.getParentFile();
@@ -54,7 +57,35 @@ public class FileUtil {
             log.error("文件保存失败！");
             throw new ServiceException(214, "文件保存失败！");
         }
-        return fileName; // 返回重命名后的文件名
+        return dId + "/" + fileName; // 返回重命名后的文件名
+    }
+
+    /**
+     * 将byteArray文件存储到本地路径下
+     * @param data
+     * @param filePath
+     * @throws IOException
+     */
+    public void saveToFile(byte[] data, String filePath) throws IOException {
+        File file = new File(filePath);
+        File parentDir = file.getParentFile(); // 获取父目录
+
+        // 确保目录存在
+        if (parentDir != null && !parentDir.exists()) {
+            boolean created = parentDir.mkdirs();
+            if (!created) {
+                log.error("无法创建目录: {}", parentDir.getAbsolutePath());
+                throw new IOException("目录创建失败: " + parentDir.getAbsolutePath());
+            }
+        }
+
+        // 写入文件
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(data);
+        } catch (IOException e) {
+            log.error("文件保存失败: {}", e.getMessage());
+            throw e;
+        }
     }
 
 }

@@ -108,6 +108,21 @@
 			<artifactId>spring-security-crypto</artifactId>
 		</dependency>
 
+		<!-- springboot整合RabbitMQ -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+
+		<!-- iText 生成pdf诊断报告 -->
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>itext-core</artifactId>
+			<version>8.0.4</version>
+			<type>pom</type>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>

@@ -5,6 +5,7 @@ import com.scu.imageseg.entity.*;
 import com.scu.imageseg.mapper.DiagnosisRequestMapper;
 import com.scu.imageseg.mapper.ImageFileMapper;
 import com.scu.imageseg.service.ICustomUserService;
+import com.scu.imageseg.service.IDiagnosedPdfService;
 import com.scu.imageseg.service.IDiagnosisRequestService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -111,5 +112,81 @@ public class DiagnosisRequestServiceImpl extends ServiceImpl<DiagnosisRequestMap
             diagnosisRequestWithImageList.add(diagnosisRequestWithImage);
         }
         return diagnosisRequestWithImageList;
+    }
+
+    /**
+     * 根据诊断Id获取对应的诊断申请数据
+     * @param diagnosisRequestId
+     * @return
+     */
+    @Override
+    public DiagnosisRequestWithImage getDiagnosisRequestsWithImagesUsingId(Long diagnosisRequestId) {
+        QueryWrapper<DiagnosisRequest> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", diagnosisRequestId);
+        DiagnosisRequest diagnosisRequest = diagnosisRequestMapper.selectOne(queryWrapper);
+
+        // 查询对应诊断申请的图片路径 同时调用Spring BeanUtils类实现将父类对象复制到子类中
+        DiagnosisRequestWithImage diagnosisRequestWithImage = new DiagnosisRequestWithImage();
+        QueryWrapper<ImageFile> imageFileQueryWrapper = new QueryWrapper<>();
+        imageFileQueryWrapper.eq("diagnosis_request_id", diagnosisRequestId);
+
+        // 查询对应的imageFiles实体类列表
+        List<ImageFile> imageFiles = imageFileMapper.selectList(imageFileQueryWrapper);
+        BeanUtils.copyProperties(diagnosisRequest, diagnosisRequestWithImage); // BeanUtils 将父类数据复制给子类
+        List<String> filePaths = new ArrayList<>();
+        // 追加到List中并给返回类赋值
+        for (ImageFile imageFile:imageFiles){
+            filePaths.add(imageFile.getFilePath());
+        }
+        diagnosisRequestWithImage.setFile_path(filePaths);
+
+        return diagnosisRequestWithImage;
+
+    }
+
+    /**
+     * 获取不同用户、不同角色、不同状态的所有诊断申请列表
+     * 由于已诊断申请列表需要提供pdf路径，所以需要另外处理
+     * @param userId
+     * @param role
+     * @param status
+     * @return
+     */
+    @Override
+    public List<DiagnosisRequestWithImage> getDiagnosisStatusRequestsWithImages(Long userId, String role, String status) {
+        QueryWrapper<DiagnosisRequest> diagnosisRequestQueryWrapper = new QueryWrapper<>();
+        diagnosisRequestQueryWrapper.eq("status", status);
+        if(role.equals("patient")){
+            log.info("用户角色为：patient");
+            diagnosisRequestQueryWrapper.eq("patient_id", userId);
+        }else if(role.equals("doctor")){
+            log.info("用户角色为：doctor");
+            diagnosisRequestQueryWrapper.eq("doctor_id", userId);
+        }else {
+            log.error("出现异常role信息");
+        }
+        List<DiagnosisRequest> diagnosisRequests = diagnosisRequestMapper.selectList(diagnosisRequestQueryWrapper);
+        // 查询对应诊断申请的图片路径 同时调用Spring BeanUtils类实现将父类对象复制到子类中
+        List<DiagnosisRequestWithImage> diagnosisRequestWithImageList = new ArrayList<>();
+        for (DiagnosisRequest diagnosisRequest: diagnosisRequests){
+            QueryWrapper<ImageFile> imageFileQueryWrapper = new QueryWrapper<>();
+            imageFileQueryWrapper.eq("diagnosis_request_id", diagnosisRequest.getId());
+            // 查询对应的imageFiles实体类列表
+            List<ImageFile> imageFiles = imageFileMapper.selectList(imageFileQueryWrapper);
+            List<String> filePaths = new ArrayList<>();
+            // 依次读取文件路径
+            for(ImageFile imageFile:imageFiles){
+                filePaths.add(imageFile.getFilePath());
+            }
+            // 构造返回实体类
+            DiagnosisRequestWithImage diagnosisRequestWithImage = new DiagnosisRequestWithImage();
+            BeanUtils.copyProperties(diagnosisRequest, diagnosisRequestWithImage); // BeanUtils 将父类数据复制给子类
+            diagnosisRequestWithImage.setFile_path(filePaths);
+            // 追加到返回类中
+            diagnosisRequestWithImageList.add(diagnosisRequestWithImage);
+        }
+
+        return diagnosisRequestWithImageList;
+
     }
 }
