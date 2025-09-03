@@ -11,7 +11,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/imagese?serverTimezone=GMT%2B8
     username: root
-    password: root
+    password: weiletao@ZRB2025
   redis:
     host: 127.0.0.1
     port: 6379
@@ -24,8 +24,8 @@ spring:
   rabbitmq:
     host: 127.0.0.1
     port: 5672
-    username: guest
-    password: guest
+    username: wlt
+    password: 123456
     virtualHost: /
 
 # 日志
@@ -35,4 +35,4 @@ mybatis-plus:
 # 全局变量声明
 globalVar:
   verifycode_timeout: 180
-  jwt_token_redis_timeout: 1800 # Redis中的Jwt Token失效时间
+  jwt_token_redis_timeout: 1800 # Redis中的Jwt Token失效时间，由于token续约机制存在，需要变为jwt token签名失效时间的2倍

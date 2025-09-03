@@ -1,13 +1,11 @@
 package com.scu.imageseg.controller;
 
 
-
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.scu.imageseg.entity.*;
 import com.scu.imageseg.exception.ServiceException;
 import com.scu.imageseg.service.*;
 import com.scu.imageseg.utils.FileUtil;
-import com.scu.imageseg.utils.RabbitMQUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,7 +126,19 @@ public class DiagnosisRequestController {
     public JSONResult<Object> myDiagnosisRequest(HttpServletRequest httpServletRequest){
         log.info("开始获取用户诊断申请...");
         try{
-            return new JSONResult<>(iDiagnosisRequestService.getUserDiagnosisRequestsWithImages(Long.valueOf((Integer)httpServletRequest.getAttribute("id"))));
+            List<DiagnosisRequestWithImage> diagnosisRequestWithImageList = iDiagnosisRequestService.getUserDiagnosisRequestsWithImages(Long.valueOf((Integer)httpServletRequest.getAttribute("id")));
+            List<DiagnosisRequestWithImageAndPdf> diagnosisRequestWithImageAndPdfs = new ArrayList<>();
+            for (DiagnosisRequestWithImage diagnosisRequestWithImage:diagnosisRequestWithImageList){
+                DiagnosisRequestWithImageAndPdf diagnosisRequestWithImageAndPdf = new DiagnosisRequestWithImageAndPdf();
+                BeanUtils.copyProperties(diagnosisRequestWithImage, diagnosisRequestWithImageAndPdf);
+                if(diagnosisRequestWithImage.getStatus().equals("diagnosed")){
+                    // 如果是已诊断的申请
+                    String pdfPath = iDiagnosedPdfService.getDiagnosedPdfByDiagnosisRequestId(diagnosisRequestWithImage.getId()).getPdfPath();
+                    diagnosisRequestWithImageAndPdf.setPdfPath(pdfPath);
+                }
+                diagnosisRequestWithImageAndPdfs.add(diagnosisRequestWithImageAndPdf);
+            }
+            return new JSONResult<>(diagnosisRequestWithImageAndPdfs);
         }catch (Exception e){
             log.error("获取用户诊断申请失败！");
             throw new ServiceException(218, "获取用户诊断申请失败！");

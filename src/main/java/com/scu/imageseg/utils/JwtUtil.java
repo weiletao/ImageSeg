@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class JwtUtil {
 
-//    private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class); // 日志（改为使用@Slf4j）
+    //    private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class); // 日志（改为使用@Slf4j）
     private static final String SECRET_KEY = "my_secret_key"; // 密钥
     private static final long EXPIRATION_TIME = 30 * 60 * 1000; // 过期时间：30分钟
 
