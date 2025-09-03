@@ -25,7 +25,8 @@ public class MyWebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 匹配到resourceHandler,将URL映射至accessFilePath（即本地文件夹）
-        registry.addResourceHandler("/img/**").addResourceLocations("file:img/");
+        registry.addResourceHandler("/img/**").addResourceLocations("file:py/img/");
+        registry.addResourceHandler("/pdf/**").addResourceLocations("file:py/pdf/");
 //        registry.addResourceHandler(resourceHandler).addResourceLocations("file:///" + accessFilePath);
     }
 

@@ -38,9 +38,12 @@ public class CustomUserServiceImpl extends ServiceImpl<CustomUserMapper, CustomU
     @Override
     public CustomUser verifyUsernamePassword(CustomUser customUser) {
         QueryWrapper<CustomUser> queryWrapper = new QueryWrapper<>();
+//        log.info(customUser.toString());
         queryWrapper.eq("username", customUser.getUsername());
         CustomUser customUserData = customUserMapper.selectOne(queryWrapper); // 根据用户名在数据库中寻找对应用户
         if(customUserData == null){ return null; } // 用户不存在
+//        log.info(customUser.getPassword());
+//        log.info(customUserData.getPassword());
         if(!new BCryptPasswordEncoder().matches(customUser.getPassword(), customUserData.getPassword())){  // 用户名或密码错误！
             log.error("用户名或密码错误！");
             throw new ServiceException(204, "用户名或密码错误！");

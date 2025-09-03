@@ -1,0 +1,26 @@
+{
+    "DATA": {
+        "IMG_SIZE": 224
+    },
+    "MODEL": {
+        "PRETRAIN_CKPT": "D:\\PycharmProjects\\ImageSe\\SeModel\\pretrained_ckpt\\swin_tiny_patch4_window7_224.pth",
+        "SWIN": {
+            "PATCH_SIZE": 4,
+            "IN_CHANS": 3,
+            "EMBED_DIM": 96,
+            "DEPTHS": [2, 2, 6, 2],
+            "NUM_HEADS": [3, 6, 12, 24],
+            "WINDOW_SIZE": 7,
+            "MLP_RATIO": 4.0,
+            "QKV_BIAS": true,
+            "QK_SCALE": null,
+            "APE": false,
+            "PATCH_NORM": true
+        },
+        "DROP_RATE": 0.0,
+        "DROP_PATH_RATE": 0.1
+    },
+    "TRAIN": {
+        "USE_CHECKPOINT": false
+    }
+}

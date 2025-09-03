@@ -109,6 +109,7 @@ public class CustomUserController {
             log.error("验证码输入错误！");
             throw new ServiceException(203, "验证码错误！");
         }
+//        log.info(loginForm.toString());
 
         /** 进行账户密码认证 */
         CustomUser customUser = new CustomUser();

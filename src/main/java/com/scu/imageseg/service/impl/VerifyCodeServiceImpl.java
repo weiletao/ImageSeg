@@ -61,7 +61,7 @@ public class VerifyCodeServiceImpl implements IVerifyCodeService {
         String vCode = RedisUtil.get(stringRedisTemplate, "VERIFY_CODE_SESSIONID_" + sessionId);
         if(vCode == null) { throw new ServiceException(207, "验证码失效"); }; // 如果找不到Redis缓存，说明验证码失效了
         try {
-            if(verifyCode.equals(vCode)){ // 在不失效的情况下校验验证码
+            if(verifyCode.equalsIgnoreCase(vCode)){ // 在不失效的情况下校验验证码
                 RedisUtil.delete(stringRedisTemplate, "VERIFY_CODE_SESSIONID_" + sessionId); // 销毁
                 return true;
             }
